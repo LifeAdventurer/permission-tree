@@ -1,0 +1,7 @@
+[package]
+name = "permission-tree"
+version = "0.1.0"
+edition = "2021"
+description = "A tree structure that manages permissions and allows moving subtrees."
+
+[dependencies]
