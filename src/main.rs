@@ -61,10 +61,30 @@ impl Tree {
         self.update_permission(child_id);
     }
 
+    fn is_descendant(&self, node_id: u32, potential_descendant_id: u32) -> bool {
+        if let Some(node) = self.nodes.get(&node_id) {
+            if node.children.contains(&potential_descendant_id) {
+                return true;
+            }
+            for &child_id in &node.children {
+                if self.is_descendant(child_id, potential_descendant_id) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     // Move a subtree rooted at `note_id` under `new_parent_id`
     fn move_subtree(&mut self, node_id: u32, new_parent_id: u32) {
         if !self.nodes.contains_key(&node_id) || !self.nodes.contains_key(&new_parent_id) {
             println!("Either node or new parent doesn't exists");
+            return;
+        }
+
+        // Prevent moving a node into it's own subtree
+        if self.is_descendant(node_id, new_parent_id) {
+            println!("Cannot move a node into its own subtree");
             return;
         }
 
@@ -157,4 +177,7 @@ fn main() {
 
     println!("\nTree after moving subtree rooted at node 2 under node 3:");
     tree.print_tree(1, 0);
+
+    // Attempting to move node 3 under node 6, which should fail since 6 is a descendant of 3
+    tree.move_subtree(3, 6);
 }
