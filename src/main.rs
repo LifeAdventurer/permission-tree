@@ -113,6 +113,14 @@ impl Tree {
 
     // Recursively update the permission of a node and its subtree
     fn update_permission(&mut self, node_id: u32) {
+        if let Some(node) = self.nodes.get(&node_id) {
+            // If this node is private, its entire subtree must be private
+            if node.permission == Permission::Private {
+                // No need to continue if this node is private
+                return;
+            }
+        }
+
         if let Some(&parent_id) = self.parent_map.get(&node_id) {
             if let Some(parent_node) = self.nodes.get(&parent_id) {
                 // If parent is private, make the node private as well
