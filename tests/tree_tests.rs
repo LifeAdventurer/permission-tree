@@ -16,7 +16,7 @@ fn test_connect_nodes() {
 
     // Adding nodes
     tree.add_node(1, Permission::Public); // root node
-    tree.add_node(2, Permission::Public);
+    tree.add_node(2, Permission::Private);
     tree.add_node(3, Permission::Public);
 
     // Connecting nodes
@@ -26,6 +26,11 @@ fn test_connect_nodes() {
     // Check if the connections are established correctly
     assert!(tree.nodes.get(&1).unwrap().children.contains(&2));
     assert!(tree.nodes.get(&1).unwrap().children.contains(&3));
+
+    // Attempt to connect node 2 to node 3, which should fail
+    tree.connect_nodes(2, 3);
+    assert_eq!(tree.nodes.get(&2).unwrap().children.contains(&3), false);
+    assert_eq!(tree.parent_map.get(&3), Some(&1));
 }
 
 #[test]
@@ -40,7 +45,6 @@ fn test_permission_inheritance() {
     tree.add_node(5, Permission::Public);
 
     // Connecting nodes
-    tree.connect_nodes(1, 2);
     tree.connect_nodes(1, 3);
     tree.connect_nodes(2, 4);
     tree.connect_nodes(2, 5);
