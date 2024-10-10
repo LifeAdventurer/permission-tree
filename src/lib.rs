@@ -88,14 +88,14 @@ impl Tree {
         false // If we reached the root without finding the node
     }
 
-    // Move a subtree rooted at `note_id` under `new_parent_id`
+    // Move a subtree rooted at `node_id` under `new_parent_id`
     pub fn move_subtree(&mut self, node_id: u32, new_parent_id: u32) {
         if !self.nodes.contains_key(&node_id) || !self.nodes.contains_key(&new_parent_id) {
-            println!("Either node or new parent doesn't exists");
+            println!("Either node or new parent doesn't exist");
             return;
         }
 
-        // Prevent moving a node into it's own subtree
+        // Prevent moving a node into its own subtree
         if self.is_descendant(node_id, new_parent_id) {
             println!("Cannot move a node into its own subtree");
             return;
@@ -121,7 +121,7 @@ impl Tree {
         println!(
             "Moved subtree rooted at node {} to new parent node {}",
             node_id, new_parent_id
-        )
+        );
     }
 
     // Recursively update the permission of a node and its subtree
