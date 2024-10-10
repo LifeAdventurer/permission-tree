@@ -51,6 +51,12 @@ impl Tree {
             return;
         }
 
+        // Check if the parent ID and child ID are the same
+        if parent_id == child_id {
+            println!("A node cannot be its own parent");
+            return;
+        }
+
         // Check if the child already has a parent
         if self.parent_map.contains_key(&child_id) {
             println!("Node {} already has a parent", child_id);
