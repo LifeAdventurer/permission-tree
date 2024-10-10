@@ -74,22 +74,18 @@ impl Tree {
     }
 
     pub fn is_descendant(&self, node_id: u32, potential_descendant_id: u32) -> bool {
-        if !self.nodes.contains_key(&node_id) || !self.nodes.contains_key(&potential_descendant_id)
-        {
-            return false;
+        // Start with the potential descendant
+        let mut current_id = potential_descendant_id;
+
+        // Traverse up the parent chain
+        while let Some(&parent_id) = self.parent_map.get(&current_id) {
+            if parent_id == node_id {
+                return true; // Found the ancestor
+            }
+            current_id = parent_id;
         }
 
-        if let Some(node) = self.nodes.get(&node_id) {
-            if node.children.contains(&potential_descendant_id) {
-                return true;
-            }
-            for &child_id in &node.children {
-                if self.is_descendant(child_id, potential_descendant_id) {
-                    return true;
-                }
-            }
-        }
-        false
+        false // If we reached the root without finding the node
     }
 
     // Move a subtree rooted at `note_id` under `new_parent_id`
