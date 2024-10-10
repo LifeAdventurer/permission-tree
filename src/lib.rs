@@ -74,6 +74,11 @@ impl Tree {
     }
 
     pub fn is_descendant(&self, node_id: u32, potential_descendant_id: u32) -> bool {
+        if !self.nodes.contains_key(&node_id) || !self.nodes.contains_key(&potential_descendant_id)
+        {
+            return false;
+        }
+
         if let Some(node) = self.nodes.get(&node_id) {
             if node.children.contains(&potential_descendant_id) {
                 return true;
