@@ -21,24 +21,53 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ### Installation
 
-1. Clone the repository:
+To use the `permission-tree` library in your project, add it as a dependency in your `Cargo.toml` file:
 
-    ```sh
-    git clone https://github.com/yourusername/permission-tree.git
-    cd permission-tree
-    ```
+```toml
+[dependencies]
+permission_tree = { git = "https://github.com/LifeAdventurer/permission-tree.git" }
+```
 
-2. Build the project:
-    
-    ```sh
-    cargo build
-    ```
+### Usage
 
-3. Run the project:
+Here's a quick example of how to use the `permission_tree` in your code:
 
-    ```sh
-    cargo run
-    ```
+```rs
+use permission_tree::{Permission, Tree};
+
+fn main() {
+    let mut tree = Tree::new();
+
+    // Adding nodes with permission
+    tree.add_node(1, Permission::Public); // root node
+    tree.add_node(2, Permission::Public);
+    tree.add_node(3, Permission::Private);
+    tree.add_node(4, Permission::Public);
+    tree.add_node(5, Permission::Public);
+
+    // Connecting nodes
+    tree.connect_nodes(1, 2);
+    tree.connect_nodes(1, 3);
+    tree.connect_nodes(2, 4);
+    tree.connect_nodes(2, 5);
+
+    println!("Initial tree:");
+    tree.print_tree(1, 0);
+
+    // Moving a public subtree (node 2 and its children) to a private node (node 3))
+    tree.move_subtree(2, 3);
+
+    println!("Tree after moving subtree rooted at node 2 under node 3:");
+    tree.print_tree(1, 0);
+```
+
+### Running Tests
+
+To run tests for the `permission_tree` library, use:
+
+```sh
+cargo test
+```
 
 ## License
 
