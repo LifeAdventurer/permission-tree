@@ -58,7 +58,7 @@ fn main() {
     tree.move_subtree(2, 3);
 
     println!("Tree after moving subtree rooted at node 2 under node 3:");
-    tree.print_tree(1, 0);
+    println!("{}", tree.print_tree(1, 0));
 ```
 
 ### Running Tests

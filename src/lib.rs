@@ -152,18 +152,21 @@ impl Tree {
         }
     }
 
-    pub fn print_tree(&self, root: u32, indent: usize) {
+    pub fn print_tree(&self, root: u32, indent: usize) -> String {
+        let mut result = String::new();
+
         if let Some(node) = self.nodes.get(&root) {
-            println!(
+            result.push_str(&format!(
                 "{:indent$}- node {} ({:?})",
                 "",
                 node.id,
                 node.permission,
                 indent = indent
-            );
+            ));
             for &child in &node.children {
-                self.print_tree(child, indent + 4);
+                result.push_str(&self.print_tree(child, indent + 4));
             }
         }
+        result
     }
 }
