@@ -8,7 +8,7 @@ pub enum Permission {
 
 #[derive(Debug)]
 pub struct TreeNode {
-    id: u32,
+    pub id: u32,
     pub permission: Permission,
     pub children: HashSet<u32>,
 }
@@ -16,7 +16,7 @@ pub struct TreeNode {
 #[derive(Debug)]
 pub struct Tree {
     pub nodes: HashMap<u32, TreeNode>,
-    parent_map: HashMap<u32, u32>, // Keeps track of parent-child relationships
+    pub parent_map: HashMap<u32, u32>, // Keeps track of parent-child relationships
 }
 
 impl Tree {
@@ -51,10 +51,16 @@ impl Tree {
             return;
         }
 
+        // Check if the child already has a parent
+        if self.parent_map.contains_key(&child_id) {
+            println!("Node {} already has a parent", child_id);
+            return;
+        }
+
         if let Some(parent_node) = self.nodes.get_mut(&parent_id) {
             parent_node.children.insert(child_id);
             self.parent_map.insert(child_id, parent_id);
-            println!("node {} connected as child of {}", child_id, parent_id);
+            println!("Node {} connected as child of {}", child_id, parent_id);
         }
 
         // Ensure the child inherits permission if the parent is private
