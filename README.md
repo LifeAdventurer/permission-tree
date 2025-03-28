@@ -1,13 +1,14 @@
 # Permission Tree
 
-A tree structure that manages permissions and allows moving subtrees. This project implements a simple permission tree where each node can be public or private. When a public subtree is moved to a private node, the entire subtree becomes private.
+A tree structure that manages permissions and tags, and allows moving subtrees. This project implements a simple permission tree where each node can be public or private and optionally contain tags. When a public subtree is moved to a private node, the entire subtree becomes private. Tags are also inherited from ancestor nodes.
 
 ## Features
 
 - Create and manage a tree structure.
-- Add nodes with customizable permissions (public/private).
+- Add nodes with customizable permissions (`Public` / `Private`).
 - Move subtrees while maintaining permission rules.
-- Inherit permissions from parent nodes.
+- Inherit permissions and tags from parent nodes.
+- Assign and merge tags dynamically.
 
 ## Getting Started
 
@@ -38,26 +39,30 @@ use permission_tree::{Permission, Tree};
 fn main() {
     let mut tree = Tree::new();
 
-    // Adding nodes with permission
-    tree.add_node(1, Permission::Public); // root node
+    // Add nodes with permission
+    tree.add_node(1, Permission::Public);
     tree.add_node(2, Permission::Public);
     tree.add_node(3, Permission::Private);
     tree.add_node(4, Permission::Public);
     tree.add_node(5, Permission::Public);
 
-    // Connecting nodes
+    // Add tags
+    tree.add_tag_to_node(1, "root".to_string());
+    tree.add_tag_to_node(2, "important".to_string());
+
+    // Connect nodes
     tree.connect_nodes(1, 2);
     tree.connect_nodes(1, 3);
     tree.connect_nodes(2, 4);
     tree.connect_nodes(2, 5);
 
     println!("Initial tree:");
-    tree.print_tree(1, 0);
+    println!("{}", tree.print_tree(1, 0));
 
-    // Moving a public subtree (node 2 and its children) to a private node (node 3))
+    // Move a subtree (2 and its children) under a private node (3)
     tree.move_subtree(2, 3);
 
-    println!("Tree after moving subtree rooted at node 2 under node 3:");
+    println!("\nTree after moving subtree rooted at node 2 under node 3:");
     println!("{}", tree.print_tree(1, 0));
 }
 ```
