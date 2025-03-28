@@ -6,11 +6,12 @@ pub enum Permission {
     Private,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TreeNode {
     pub id: u32,
     pub permission: Permission,
     pub children: HashSet<u32>,
+    pub tags: Option<HashSet<String>>,
 }
 
 #[derive(Debug)]
@@ -27,7 +28,7 @@ impl Tree {
         }
     }
 
-    // Add a node with permission to the tree
+    // Add a node with permission to the tree. Tags are set to None initially
     pub fn add_node(&mut self, id: u32, permission: Permission) {
         if self.nodes.contains_key(&id) {
             println!("Node with ID {} already exists", id);
@@ -39,9 +40,30 @@ impl Tree {
                 id,
                 permission: permission.clone(),
                 children: HashSet::new(),
+                tags: None,
             },
         );
         println!("Node with ID {} added with {:?} permission", id, permission);
+    }
+
+    // Add a tag to a node; initialize tags if they are None.
+    pub fn add_tag_to_node(&mut self, id: u32, tag: String) {
+        if let Some(node) = self.nodes.get_mut(&id) {
+            match &mut node.tags {
+                Some(tags) => {
+                    tags.insert(tag);
+                }
+                None => {
+                    let mut new_tags = HashSet::new();
+                    new_tags.insert(tag);
+                    node.tags = Some(new_tags);
+                }
+            }
+            // Optionally, update tags for the subtree to reflect inherited changes.
+            self.update_tags(id);
+        } else {
+            println!("Node with ID {} does not exist", id);
+        }
     }
 
     // Connect two nodes, making `parent_id` the parent of `child_id`
@@ -69,8 +91,9 @@ impl Tree {
             println!("Node {} connected as child of {}", child_id, parent_id);
         }
 
-        // Ensure the child inherits permission if the parent is private
+        // Update both permission and tags to inherit from the parent
         self.update_permission(child_id);
+        self.update_tags(child_id);
     }
 
     pub fn is_descendant(&self, node_id: u32, potential_descendant_id: u32) -> bool {
@@ -115,8 +138,9 @@ impl Tree {
         }
         self.parent_map.insert(node_id, new_parent_id);
 
-        // Update permissions for the subtree based on the new parent
+        // Update both permissions and tags for the moved subtree based on the new parent
         self.update_permission(node_id);
+        self.update_tags(node_id);
 
         println!(
             "Moved subtree rooted at node {} to new parent node {}",
@@ -124,7 +148,7 @@ impl Tree {
         );
     }
 
-    // Recursively update the permission of a node and its subtree
+    // Recursively update the permission of a node and its subtree.
     fn update_permission(&mut self, node_id: u32) {
         if let Some(node) = self.nodes.get(&node_id) {
             // If this node is private, its entire subtree must be private
@@ -153,15 +177,54 @@ impl Tree {
         }
     }
 
+    // Recursively update the tags of a node and its subtree by inheriting parent's tags.
+    fn update_tags(&mut self, node_id: u32) {
+        // Retrieve inherited tags from the parent (if any)
+        let inherited_tags = if let Some(&parent_id) = self.parent_map.get(&node_id) {
+            if let Some(parent_node) = self.nodes.get(&parent_id) {
+                parent_node.tags.clone().unwrap_or_else(HashSet::new)
+            } else {
+                HashSet::new()
+            }
+        } else {
+            HashSet::new()
+        };
+
+        // Update current node's tags: merge its own tags (if present) with inherited ones.
+        if let Some(node) = self.nodes.get_mut(&node_id) {
+            match &mut node.tags {
+                Some(tags_set) => {
+                    // Insert inherited tags into the existing set (set union is idempotent)
+                    tags_set.extend(inherited_tags);
+                }
+                None => {
+                    if !inherited_tags.is_empty() {
+                        node.tags = Some(inherited_tags);
+                    }
+                }
+            }
+        }
+
+        // Recursively update tags for all children
+        if let Some(node) = self.nodes.get(&node_id) {
+            let children: Vec<u32> = node.children.iter().cloned().collect();
+            for child_id in children {
+                self.update_tags(child_id);
+            }
+        }
+    }
+
+    // Print the tree starting from the given root.
     pub fn print_tree(&self, root: u32, indent: usize) -> String {
         let mut result = String::new();
 
         if let Some(node) = self.nodes.get(&root) {
             result.push_str(&format!(
-                "{:indent$}- node {} ({:?})",
+                "{:indent$}- node {} ({:?}), tags: {:?}\n",
                 "",
                 node.id,
                 node.permission,
+                node.tags,
                 indent = indent
             ));
             for &child in &node.children {
